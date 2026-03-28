@@ -1,0 +1,7 @@
+{
+  "name": "vira-dashboard",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.0"
+  }
+}
