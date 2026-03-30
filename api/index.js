@@ -104,6 +104,20 @@ module.exports = async function handler(req, res) {
       else qualityDist['8-10']++
     }
 
+    // JSON返却モード
+    if (req.query.format === 'json') {
+      res.setHeader('Content-Type', 'application/json')
+      return res.json({
+        summary, monthlyCost, pfStats, dailyChart, topPosts,
+        quality: { avg: qualityAvg, dist: qualityDist },
+        weeklyReports: weeklyReports.map(r => ({
+          week_start: r.week_start, total_posts: r.total_posts,
+          follower_change: r.follower_change, cost_usd: r.cost_usd,
+        })),
+        generatedAt: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC',
+      })
+    }
+
     // HTML生成
     const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
     const dailyEntries = Object.entries(dailyChart)
