@@ -33,6 +33,8 @@ module.exports = async function handler(req, res) {
 
     const posts = postsRes.data || []
     const monthlyCost = (costRes.data || []).reduce((s, r) => s + Number(r.cost_usd), 0)
+    const USD_JPY = 150
+    const fmtCost = (usd) => `$${usd.toFixed(2)} (${Math.round(usd * USD_JPY).toLocaleString()}円)`
     const weeklyReports = reportsRes.data || []
 
     // 集計
@@ -126,7 +128,7 @@ module.exports = async function handler(req, res) {
         ['いいね', summary.totalLikes, 'bg-pink-900'],
         ['RT/リポスト', summary.totalRetweets, 'bg-green-900'],
         ['ビュー', summary.totalViews, 'bg-purple-900'],
-        ['月間コスト', '$' + monthlyCost.toFixed(2), 'bg-yellow-900'],
+        ['月間コスト', fmtCost(monthlyCost), 'bg-yellow-900'],
       ].map(([label, value, bg]) => `
         <div class="${bg} rounded-xl p-5 text-center">
           <div class="text-gray-400 text-sm">${label}</div>
@@ -237,7 +239,7 @@ module.exports = async function handler(req, res) {
                 <td class="py-2">${esc(r.week_start || '-')}</td>
                 <td class="py-2 text-right">${r.total_posts ?? '-'}</td>
                 <td class="py-2 text-right">${r.follower_change != null ? (r.follower_change >= 0 ? '+' : '') + r.follower_change : '-'}</td>
-                <td class="py-2 text-right">${r.cost_usd != null ? '$' + Number(r.cost_usd).toFixed(2) : '-'}</td>
+                <td class="py-2 text-right">${r.cost_usd != null ? fmtCost(Number(r.cost_usd)) : '-'}</td>
               </tr>`).join('')}
           </tbody>
         </table>
