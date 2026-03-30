@@ -3,9 +3,15 @@ const { createClient } = require('@supabase/supabase-js')
 const PLATFORMS = ['x', 'bluesky', 'note', 'qiita', 'zenn']
 
 module.exports = async function handler(req, res) {
-  // トークン認証
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS')
+  if (req.method === 'OPTIONS') { res.status(204).end(); return }
+
+  // トークン認証（API key or ダッシュボードパスワード）
   const token = req.query.key || req.headers['x-dashboard-key']
-  if (!token || token !== process.env.DASHBOARD_SECRET) {
+  const pw = req.query.pw
+  if (!(token && token === process.env.DASHBOARD_SECRET) && !(pw && pw === process.env.DASHBOARD_PASSWORD)) {
     res.status(401).send('Unauthorized')
     return
   }
