@@ -60,8 +60,8 @@ module.exports = async function handler(req, res) {
         total,
         posted,
         successRate: total > 0 ? ((posted / total) * 100).toFixed(1) : '0.0',
-        avgLikes: total > 0 ? (pfPosts.reduce((s, p) => s + (p.likes || 0), 0) / total).toFixed(1) : '0.0',
-        avgViews: total > 0 ? (pfPosts.reduce((s, p) => s + (p.views || 0), 0) / total).toFixed(1) : '0.0',
+        avgLikes: posted > 0 ? (pfPosts.filter(p => p.status === 'posted').reduce((s, p) => s + (p.likes || 0), 0) / posted).toFixed(1) : '0.0',
+        avgViews: posted > 0 ? (pfPosts.filter(p => p.status === 'posted').reduce((s, p) => s + (p.views || 0), 0) / posted).toFixed(1) : '0.0',
       }
     }
 
