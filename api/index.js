@@ -43,12 +43,13 @@ module.exports = async function handler(req, res) {
     const fmtCost = (usd) => `$${usd.toFixed(2)} (${Math.round(usd * USD_JPY).toLocaleString()}円)`
     const weeklyReports = reportsRes.data || []
 
-    // 集計
+    // 集計（posted済みのみ — draft/failedのlikes=0が希釈するのを防ぐ）
+    const postedPosts = posts.filter(p => p.status === 'posted')
     const summary = {
-      totalPosts: posts.length,
-      totalLikes: posts.reduce((s, p) => s + (p.likes || 0), 0),
-      totalRetweets: posts.reduce((s, p) => s + (p.retweets || 0), 0),
-      totalViews: posts.reduce((s, p) => s + (p.views || 0), 0),
+      totalPosts: postedPosts.length,
+      totalLikes: postedPosts.reduce((s, p) => s + (p.likes || 0), 0),
+      totalRetweets: postedPosts.reduce((s, p) => s + (p.retweets || 0), 0),
+      totalViews: postedPosts.reduce((s, p) => s + (p.views || 0), 0),
     }
 
     const pfStats = {}
@@ -78,8 +79,8 @@ module.exports = async function handler(req, res) {
       if (key in dailyChart) dailyChart[key]++
     }
 
-    // トップ投稿
-    const topPosts = [...posts]
+    // トップ投稿（posted済みのみ）
+    const topPosts = [...postedPosts]
       .sort((a, b) => (b.likes || 0) - (a.likes || 0))
       .slice(0, 10)
       .map(p => ({
