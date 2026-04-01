@@ -90,8 +90,8 @@ module.exports = async function handler(req, res) {
         date: p.posted_at ? p.posted_at.slice(0, 10) : '-',
       }))
 
-    // 品質スコア
-    const scored = posts.filter(p => p.quality_score != null)
+    // 品質スコア（posted済みのみ）
+    const scored = postedPosts.filter(p => p.quality_score != null)
     const qualityAvg = scored.length > 0
       ? (scored.reduce((s, p) => s + p.quality_score, 0) / scored.length).toFixed(2)
       : '0'
@@ -174,7 +174,7 @@ module.exports = async function handler(req, res) {
               const s = pfStats[pf]
               return `<tr class="border-b border-gray-800">
                 <td class="py-2 font-medium">${esc(pf)}</td>
-                <td class="py-2 text-right">${s.total}</td>
+                <td class="py-2 text-right">${s.posted}</td>
                 <td class="py-2 text-right">${s.avgLikes}</td>
                 <td class="py-2 text-right">${s.avgViews}</td>
                 <td class="py-2 text-right">${s.successRate}%</td>
