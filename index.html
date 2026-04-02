@@ -91,7 +91,7 @@
         {l:'閲覧数',v:fN(s.totalViews),sub:'合計',a:'#8b5cf6'},
         {l:'月間コスト',v:'$'+mc.toFixed(2)+' (≈'+Math.round(mc*150).toLocaleString()+'円)',sub:'今月',a:'#f59e0b'},
       ];
-      var h='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:48px;"><div><h1 style="font-size:26px;font-weight:700;letter-spacing:-0.5px;color:#1e293b;margin:0;">Viralana</h1><p style="font-size:13px;color:#94a3b8;margin:4px 0 0;">SNS自動投稿ダッシュボード</p></div><div style="display:flex;align-items:center;gap:12px;"><div style="font-size:12px;color:#94a3b8;">最終更新: '+esc(d.generatedAt)+'</div><button onclick="refreshDashboard()" id="refresh-btn" style="background:#1e293b;color:#fff;border:none;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;">更新</button></div></div>';
+      var h='';
       h+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:48px;">';
       cards.forEach(function(c){h+='<div style="background:#fff;border:1px solid #f1f5f9;border-radius:16px;padding:24px 20px;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04);"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:'+c.a+';border-radius:16px 16px 0 0;"></div><div style="font-size:12px;color:#94a3b8;letter-spacing:0.02em;margin-bottom:8px;">'+c.l+'</div><div style="font-size:30px;font-weight:700;color:#1e293b;letter-spacing:-1px;">'+esc(c.v)+'</div><div style="font-size:11px;color:#cbd5e1;margin-top:4px;">'+c.sub+'</div></div>';});
       h+='</div>';
@@ -148,6 +148,7 @@
         var tsEl=document.querySelector('[data-generated-at]');
         if(tsEl)tsEl.textContent='最終更新: '+esc(data.generatedAt);
         try{sessionStorage.removeItem('vd_html');}catch(e){}
+        btn.textContent='更新';btn.disabled=false;btn.style.opacity='1';
       }catch(e){
         var b=document.getElementById('refresh-btn');
         if(b){b.textContent='更新失敗';b.style.background='#ef4444';
