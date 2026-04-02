@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
     const todayJST = toJSTDateString()
     const monthStart = todayJST.slice(0, 8) + '01T00:00:00+09:00'
 
-    const [postsRes, costRes, reportsRes] = await Promise.all([
+    const [postsRes, costRes, reportsRes, followerRes] = await Promise.all([
       db.from('vira_posts')
         .select('platform, likes, retweets, views, replies, posted_at, content, content_type, quality_score, status')
         .gte('posted_at', sinceJST)
@@ -43,11 +43,16 @@ module.exports = async function handler(req, res) {
         .select('*')
         .order('week_start', { ascending: false })
         .limit(4),
+      db.from('vira_follower_history')
+        .select('platform, project, account_username, follower_count, following_count, recorded_at')
+        .gte('recorded_at', sinceJST)
+        .order('recorded_at', { ascending: true }),
     ])
 
     const posts = (postsRes.data || []).filter(p => p.status === 'posted')
     const monthlyCost = (costRes.data || []).reduce((s, r) => s + Number(r.cost_usd), 0)
     const weeklyReports = reportsRes.data || []
+    const followerData = followerRes.data || []
 
     const summary = {
       totalPosts: posts.length,
@@ -103,6 +108,28 @@ module.exports = async function handler(req, res) {
       else qualityDist['8-10']++
     }
 
+    // フォロワーサマリー
+    const followerSummary = {}
+    const pfGroups = {}
+    for (const row of followerData) {
+      const key = row.platform
+      if (!pfGroups[key]) pfGroups[key] = { username: row.account_username, records: [] }
+      pfGroups[key].records.push(row)
+    }
+    for (const [pf, info] of Object.entries(pfGroups)) {
+      const sorted = info.records.sort((a, b) => new Date(a.recorded_at) - new Date(b.recorded_at))
+      const latest = sorted[sorted.length - 1]
+      const oldest = sorted[0]
+      const change = latest.follower_count - oldest.follower_count
+      followerSummary[pf] = {
+        username: info.username,
+        current: latest.follower_count,
+        following: latest.following_count || 0,
+        change,
+        changePercent: oldest.follower_count > 0 ? ((change / oldest.follower_count) * 100).toFixed(1) : '0.0',
+      }
+    }
+
     const generatedAt = jstNow()
 
     res.setHeader('Content-Type', 'application/json')
@@ -114,6 +141,7 @@ module.exports = async function handler(req, res) {
         week_start: r.week_start, total_posts: r.total_posts,
         follower_change: r.follower_change, cost_usd: r.cost_usd,
       })),
+      followerSummary,
       generatedAt,
     })
   } catch (err) {
