@@ -6,6 +6,10 @@ function jstNow() {
   return new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
 }
 
+function toJSTDateString(d = new Date()) {
+  return d.toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' })
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS')
@@ -20,17 +24,21 @@ module.exports = async function handler(req, res) {
 
   try {
     const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
-    const since = new Date()
-    since.setDate(since.getDate() - 30)
+    const now = new Date()
+    now.setDate(now.getDate() - 30)
+    const sinceJST = toJSTDateString(now) + 'T00:00:00+09:00'
+
+    const todayJST = toJSTDateString()
+    const monthStart = todayJST.slice(0, 8) + '01T00:00:00+09:00'
 
     const [postsRes, costRes, reportsRes] = await Promise.all([
       db.from('vira_posts')
         .select('platform, likes, retweets, views, replies, posted_at, content, content_type, quality_score, status')
-        .gte('posted_at', since.toISOString())
+        .gte('posted_at', sinceJST)
         .order('posted_at', { ascending: false }),
       db.from('vira_cost_log')
         .select('cost_usd')
-        .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+        .gte('created_at', monthStart),
       db.from('vira_weekly_reports')
         .select('*')
         .order('week_start', { ascending: false })
@@ -64,7 +72,7 @@ module.exports = async function handler(req, res) {
     const dailyChart = {}
     for (let i = 29; i >= 0; i--) {
       const d = new Date(); d.setDate(d.getDate() - i)
-      dailyChart[d.toISOString().slice(0, 10)] = 0
+      dailyChart[toJSTDateString(d)] = 0
     }
     for (const p of posts) {
       if (!p.posted_at) continue
