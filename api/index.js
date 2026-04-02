@@ -1,6 +1,6 @@
 const { createClient } = require('@supabase/supabase-js')
 
-const PLATFORMS = ['x', 'bluesky', 'note', 'qiita', 'zenn']
+const PLATFORMS = ['x', 'bluesky', 'youtube', 'note', 'qiita', 'zenn']
 
 module.exports = async function handler(req, res) {
   // CORS
