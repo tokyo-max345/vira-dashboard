@@ -147,8 +147,8 @@
         // 最終更新時刻をヘッダーにも反映
         var tsEl=document.querySelector('[data-generated-at]');
         if(tsEl)tsEl.textContent='最終更新: '+esc(data.generatedAt);
-        try{sessionStorage.setItem('vd_html',document.getElementById('content').innerHTML);}catch(e){}
         btn.textContent='更新';btn.disabled=false;btn.style.opacity='1';
+        try{sessionStorage.setItem('vd_html',document.getElementById('content').innerHTML);}catch(e){}
       }catch(e){
         var b=document.getElementById('refresh-btn');
         if(b){b.textContent='更新失敗';b.style.background='#ef4444';
