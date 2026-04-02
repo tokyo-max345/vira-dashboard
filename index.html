@@ -61,6 +61,8 @@
       }
     }
     if(sessionStorage.getItem('vd')==='1')show();
+    // ページロード時にボタン状態を強制リセット（キャッシュに「更新中...」が残る問題対策）
+    setTimeout(function(){var b=document.getElementById('refresh-btn');if(b&&b.textContent!=='更新'){b.textContent='更新';b.disabled=false;b.style.opacity='1';b.style.background='#1e293b';}},0);
     var PROJECT_COLORS={_all:'#1e293b',skillora:'#8b5cf6',nightbizlab:'#f59e0b'};
     function switchTab(key){
       document.querySelectorAll('[data-panel]').forEach(function(el){el.style.display='none';});
