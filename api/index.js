@@ -49,6 +49,14 @@ module.exports = async function handler(req, res) {
         .order('recorded_at', { ascending: true }),
     ])
 
+    // 読み取り失敗を空データ扱いにすると「投稿0件・費用$0」が正常に見える（DB停止時に実際に起きた）
+    const failed = [['vira_posts', postsRes], ['vira_cost_log', costRes], ['vira_weekly_reports', reportsRes], ['vira_follower_history', followerRes]]
+      .filter(([, r]) => r.error)
+    if (failed.length) {
+      console.error('[vira-dashboard] DB read failed', failed.map(([t, r]) => `${t}: ${r.error.message}`))
+      return res.status(503).json({ error: 'DBから読み取れません（Viralana は 2026-09-17 から停止中）', tables: failed.map(([t, r]) => ({ table: t, message: r.error.message })) })
+    }
+
     const posts = (postsRes.data || []).filter(p => p.status === 'posted')
     const monthlyCost = (costRes.data || []).reduce((s, r) => s + Number(r.cost_usd), 0)
     const weeklyReports = reportsRes.data || []
