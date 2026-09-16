@@ -1,0 +1,7 @@
+# Vercel は .gitignore を見ないため、配信に要るものだけを送る（.env.local 等の鍵ファイルを上げない）
+/*
+!/api
+!/index.html
+!/package.json
+!/package-lock.json
+!/vercel.json
