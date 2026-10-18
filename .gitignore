@@ -3,3 +3,9 @@ node_modules/
 
 .vercel
 .env*.local
+
+# secrets（2026-10-19 .env.pull.tmp が公開リポに追跡されていたため .env 系を全除外）
+.env
+.env.*
+!.env.example
+*.pull.tmp
